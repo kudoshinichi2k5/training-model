@@ -1,0 +1,15 @@
+# Đường dẫn tương đối đến thư mục train và val từ vị trí của file .yaml
+train: ./dataset/images/train/
+val: ./dataset/images/val/
+
+# Số lượng lớp
+nc: 6
+
+# Tên các lớp (phải đúng thứ tự trong file classes.txt)
+names:
+  - 'di_thang'
+  - 're_trai'
+  - 'cam_di_thang'
+  - 'cam_re_trai'
+  - 'cam_re_phai'
+  - 're_phai'
