@@ -1,0 +1,1 @@
+yolo detect train data=traffic_signs.yaml model=yolov8n.pt epochs=100 imgsz=640
