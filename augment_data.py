@@ -7,7 +7,7 @@ IMAGE_DIR = 'original_images/'
 LABEL_DIR = 'original_labels/'
 AUG_IMAGE_DIR = 'augmented_images/'
 AUG_LABEL_DIR = 'augmented_labels/'
-NUM_AUGMENTATIONS_PER_IMAGE = 30 # Số lượng ảnh tăng cường muốn tạo ra cho mỗi ảnh gốc
+NUM_AUGMENTATIONS_PER_IMAGE = 50 # Số lượng ảnh tăng cường muốn tạo ra cho mỗi ảnh gốc
 
 # Tạo thư mục đầu ra nếu chưa có
 os.makedirs(AUG_IMAGE_DIR, exist_ok=True)
@@ -49,11 +49,6 @@ for image_filename in os.listdir(IMAGE_DIR):
         print(f"Cảnh báo: Bỏ qua ảnh {image_filename} vì không có file nhãn tương ứng.")
         continue
 
-    # Kiểm tra xem ảnh có chứa class 'cam_re_trai' không
-    contains_cam_re_trai = any(int(line.strip().split()[0]) == 3 for line in open(label_path))
-    if not contains_cam_re_trai:
-        continue  # Bỏ qua nếu không chứa cam_re_trai
-
 
     # Đọc ảnh
     image = cv2.imread(image_path)
@@ -92,6 +87,9 @@ for image_filename in os.listdir(IMAGE_DIR):
                 # Chuyển tên lớp về lại ID
                 class_id = class_map[label]
                 x_center, y_center, width, height = bbox
+                # Loại bỏ box không hợp lệ
+                if not (0 <= x_center <= 1 and 0 <= y_center <= 1 and 0 < width <= 1 and 0 < height <= 1):
+                    continue
                 f.write(f"{class_id} {x_center} {y_center} {width} {height}\n")
 
     print(f"Đã tạo {NUM_AUGMENTATIONS_PER_IMAGE} phiên bản cho ảnh {image_filename}")
