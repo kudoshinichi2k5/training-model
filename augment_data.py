@@ -16,11 +16,11 @@ os.makedirs(AUG_LABEL_DIR, exist_ok=True)
 # --- ĐỊNH NGHĨA CÁC PHÉP TĂNG CƯỜNG ---
 # Tham khảo thêm tại: https://albumentations.ai/docs/
 transform = A.Compose([
-    A.Rotate(limit=15, p=0.7),      # Xoay ảnh ngẫu nhiên trong khoảng -15 đến 15 độ, xác suất 70%
+    A.Rotate(limit=10, p=0.7),      # Xoay ảnh ngẫu nhiên trong khoảng -15 đến 15 độ, xác suất 70%
     A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=0.8),    # Thay đổi độ sáng và độ tương phản ngẫu nhiên, xác suất 80%
     A.GaussianBlur(blur_limit=(3, 7), p=0.5),   # Làm mờ ảnh bằng bộ lọc Gaussian, xác suất 50%
     A.GaussNoise(var_limit=(10.0, 50.0), p=0.5),    # Thêm nhiễu Gaussian vào ảnh, xác suất 50%
-    A.ShiftScaleRotate(shift_limit=0.06, scale_limit=0.1, rotate_limit=15, p=0.7, border_mode=cv2.BORDER_CONSTANT), # Dịch, thay đổi tỷ lệ và xoay ảnh, xác suất 70%
+    A.ShiftScaleRotate(shift_limit=0.06, scale_limit=0.1, rotate_limit=0, p=0.7, border_mode=cv2.BORDER_CONSTANT), # Dịch, thay đổi tỷ lệ và xoay ảnh, xác suất 70%
 ], bbox_params=A.BboxParams(format='yolo', label_fields=['class_labels']))
 
 # Đọc file classes.txt để ánh xạ tên lớp sang ID
