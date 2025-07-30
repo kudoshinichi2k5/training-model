@@ -7,7 +7,7 @@ IMAGE_DIR = 'original_images/'
 LABEL_DIR = 'original_labels/'
 AUG_IMAGE_DIR = 'augmented_images/'
 AUG_LABEL_DIR = 'augmented_labels/'
-NUM_AUGMENTATIONS_PER_IMAGE = 50 # Số lượng ảnh tăng cường muốn tạo ra cho mỗi ảnh gốc
+NUM_AUGMENTATIONS_PER_IMAGE = 30 # Số lượng ảnh tăng cường muốn tạo ra cho mỗi ảnh gốc
 
 # Tạo thư mục đầu ra nếu chưa có
 os.makedirs(AUG_IMAGE_DIR, exist_ok=True)
@@ -21,6 +21,8 @@ transform = A.Compose([
     A.GaussianBlur(blur_limit=(3, 7), p=0.5),   # Làm mờ ảnh bằng bộ lọc Gaussian, xác suất 50%
     A.GaussNoise(var_limit=(10.0, 50.0), p=0.5),    # Thêm nhiễu Gaussian vào ảnh, xác suất 50%
     A.ShiftScaleRotate(shift_limit=0.06, scale_limit=0.1, rotate_limit=0, p=0.7, border_mode=cv2.BORDER_CONSTANT), # Dịch, thay đổi tỷ lệ và xoay ảnh, xác suất 70%
+    A.MotionBlur(blur_limit=5, p=0.4),   # Mô phỏng khi xe hoặc camera chuyển động
+    A.RandomShadow(p=0.3),               # Bóng mờ tạo hiệu ứng ánh sáng thực tế    
 ], bbox_params=A.BboxParams(format='yolo', label_fields=['class_labels']))
 
 # Đọc file classes.txt để ánh xạ tên lớp sang ID

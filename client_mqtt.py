@@ -8,10 +8,12 @@ import uuid
 import numpy as np
 from collections import deque
 
+# ======= Cấu hình MQTT =======
 MQTT_BROKER = 'nozomi.proxy.rlwy.net'  # Địa chỉ MQTT Broker
 MQTT_PORT = 32067
 REQUEST_TOPIC = "yolo/detect/request"
 RESPONSE_TOPIC_PREFIX = "yolo/detect/response/"
+# CONTROL_TOPIC = "car/control/command"
 CLIENT_ID = str(uuid.uuid4())
 RESPONSE_TOPIC = RESPONSE_TOPIC_PREFIX + CLIENT_ID
 # -----------------
@@ -20,6 +22,7 @@ is_connected = False
 latest_response = None
 last_print_time = 0
 
+# ======= MQTT Callback =======
 def on_connect(client, userdata, flags, rc, properties=None):
     global is_connected
     if rc == 0:
@@ -34,6 +37,7 @@ def on_message(client, userdata, msg):
     global latest_response
     latest_response = json.loads(msg.payload.decode())
 
+# ======= Hàm gửi ảnh hoặc video =========
 def send_request(client, image_path_or_frame):
     if isinstance(image_path_or_frame, str): # Nếu là đường dẫn file (ảnh)
         with open(image_path_or_frame, "rb") as f:
@@ -44,8 +48,40 @@ def send_request(client, image_path_or_frame):
 
     image_b64 = base64.b64encode(image_bytes).decode('utf-8')
     payload = json.dumps({"client_id": CLIENT_ID, "image_b64": image_b64})
-    client.publish(REQUEST_TOPIC, payload)
+    client.publish(REQUEST_TOPIC, payload, qos=1)
 
+# ======= Hàm xử lý điều khiển =======
+# def decide_direction(detections):
+#     if not detections:
+#         return "GO_STRAIGHT"
+
+#     labels = [det['class_name'] for det in detections]
+
+#     if "cam_di_thang" in labels:
+#         if "re_trai" in labels:
+#             return "TURN_LEFT"
+#         elif "re_phai" in labels:
+#             return "TURN_RIGHT"
+#         else:
+#             return "STOP"
+
+#     if "cam_re_phai" in labels and "cam_re_trai" in labels:
+#         return "GO_STRAIGHT"
+
+#     if "re_trai" in labels and "cam_re_phai" in labels:
+#         return "TURN_LEFT"
+#     if "re_phai" in labels and "cam_re_trai" in labels:
+#         return "TURN_RIGHT"
+
+#     if "re_trai" in labels:
+#         return "TURN_LEFT"
+#     if "re_phai" in labels:
+#         return "TURN_RIGHT"
+
+#     return "GO_STRAIGHT"
+# =====================================
+
+# ======= Hàm vẽ và in kết quả =========
 def draw_and_print_detections(image, detections):
     """Hàm chung để vẽ và in kết quả."""
     global last_print_time
@@ -71,6 +107,7 @@ def draw_and_print_detections(image, detections):
             cv2.putText(image, label, (box[0], box[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
     return image
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Client nhận diện đối tượng qua MQTT.")
     parser.add_argument('--mode', type=str, required=True, choices=['image', 'video'], help="Chế độ hoạt động: 'image' hoặc 'video'.")
@@ -80,6 +117,8 @@ if __name__ == "__main__":
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.on_connect = on_connect
     client.on_message = on_message
+    client.reconnect_delay_set(min_delay=1, max_delay=10)
+
     client.connect(MQTT_BROKER, MQTT_PORT, 60)
 
     try:
@@ -122,7 +161,7 @@ if __name__ == "__main__":
                 exit()
             
             print("Kết nối thành công. Bắt đầu stream video...")
-            frame_interval = 1 / 20
+            frame_interval = 1 / 10 # Gửi yêu cầu mỗi 100ms (10 FPS)
             last_sent_time = 0
             # Giữ lại một vài kết quả cuối cùng để vẽ nếu chưa có kết quả mới
             last_known_detections = deque(maxlen=1) 
@@ -139,6 +178,12 @@ if __name__ == "__main__":
                 # Cập nhật kết quả cuối cùng nếu có phản hồi mới
                 if latest_response is not None:
                     last_known_detections.append(latest_response)
+                    
+                    # >>> Gửi lệnh điều khiển cho xe
+                    # command = decide_direction(latest_response)
+                    # client.publish(CONTROL_TOPIC, command, qos=1)
+                    # print(f"📤 Lệnh gửi cho xe: {command}")
+                    
                     latest_response = None # Reset để chờ phản hồi mới
 
                 # Vẽ kết quả cuối cùng lên khung hình hiện tại

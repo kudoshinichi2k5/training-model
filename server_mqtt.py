@@ -59,6 +59,12 @@ def on_message(client, userdata, msg):
                     "box": [int(x1), int(y1), int(x2), int(y2)]
                 })
         
+        # Chỉ giữ lại detection có confidence cao nhất
+        if detections:
+            best_detection = max(detections, key=lambda d: d['confidence'])
+            detections = [best_detection]
+
+            
         response_payload = json.dumps(detections)
         client.publish(response_topic, response_payload)
         
