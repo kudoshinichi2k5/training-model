@@ -9,6 +9,9 @@ AUG_IMAGE_DIR = 'augmented_images/'
 AUG_LABEL_DIR = 'augmented_labels/'
 NUM_AUGMENTATIONS_PER_IMAGE = 30 # Số lượng ảnh tăng cường muốn tạo ra cho mỗi ảnh gốc
 
+# Các class cần tăng cường
+# TARGET_CLASSES = ['re_trai', 're_phai', 'cam_re_trai', 'cam_re_phai']
+
 # Tạo thư mục đầu ra nếu chưa có
 os.makedirs(AUG_IMAGE_DIR, exist_ok=True)
 os.makedirs(AUG_LABEL_DIR, exist_ok=True)
