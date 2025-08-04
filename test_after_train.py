@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import os
 
 # Đường dẫn model và thư mục ảnh test
-model_path = 'runs/detect/train/weights/best.pt'
+model_path = 'runs/detect/fine_tune_3/weights/best.pt'
 test_images_dir = 'dataset/images/val'  # Thay bằng đường dẫn thư mục ảnh test của bạn
 
 # Load model
